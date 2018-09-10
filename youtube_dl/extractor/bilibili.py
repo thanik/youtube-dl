@@ -23,7 +23,7 @@ from ..utils import (
 
 
 class BiliBiliIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:www\.|bangumi\.|)bilibili\.(?:tv|com)/(?:video/av|anime/(?P<anime_id>\d+)/play#)(?P<id>\d+)'
+    _VALID_URL = r'https?://(?:www\.|bangumi\.|)bilibili\.(?:tv|com)/(?:video/av|anime/(?P<anime_id>\d+)/play#)(?P<id>\d+)(?:/?\?p=(?P<page>\d+))?'
 
     _TESTS = [{
         'url': 'http://www.bilibili.tv/video/av1074402/',
@@ -110,13 +110,14 @@ class BiliBiliIE(InfoExtractor):
         mobj = re.match(self._VALID_URL, url)
         video_id = mobj.group('id')
         anime_id = mobj.group('anime_id')
+        page = mobj.group('page') or 1
         webpage = self._download_webpage(url, video_id)
 
         if 'anime/' not in url:
-            cid = self._search_regex(
-                r'\bcid(?:["\']:|=)(\d+)', webpage, 'cid',
-                default=None
-            ) or compat_parse_qs(self._search_regex(
+            mobj = re.findall(r'cid(?:["\']:|=)(\d+)', webpage)
+            seen_mobj = set()
+            mobj = [c for c in mobj if int(c) > 10 and not (c in seen_mobj or seen_mobj.add(c))]
+            cid = mobj[int(page) - 1] or compat_parse_qs(self._search_regex(
                 [r'EmbedPlayer\([^)]+,\s*"([^"]+)"\)',
                  r'EmbedPlayer\([^)]+,\s*\\"([^"]+)\\"\)',
                  r'<iframe[^>]+src="https://secure\.bilibili\.com/secure,([^"]+)"'],
