@@ -8,7 +8,8 @@ from ..utils import js_to_json
 
 
 class LineTVIE(InfoExtractor):
-    _VALID_URL = r'https?://tv\.line\.me/v/(?P<id>\d+)_[^/]+-(?P<segment>ep\d+-\d+)'
+    # _VALID_URL = r'https?://tv\.line\.me/v/(?P<id>\d+)(_[^/]+-(?P<segment>ep\d+-\d+))?'
+    _VALID_URL = r'https?://tv\.line\.me/v/(?P<id>\d+)'
 
     _TESTS = [{
         'url': 'https://tv.line.me/v/793123_goodbye-mrblack-ep1-1/list/69246',
@@ -26,8 +27,8 @@ class LineTVIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        series_id, segment = re.match(self._VALID_URL, url).groups()
-        video_id = '%s_%s' % (series_id, segment)
+        series_id = re.match(self._VALID_URL, url).groups()
+        video_id = '%s' % (series_id)
 
         webpage = self._download_webpage(url, video_id)
 
